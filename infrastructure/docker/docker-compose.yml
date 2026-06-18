@@ -1,0 +1,83 @@
+
+
+services:
+
+  postgres:
+
+    image: postgres:16
+
+    container_name: tutoring-postgres
+
+    restart: always
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data
+
+    networks:
+      - tutoring-network
+
+
+  redis:
+
+    image: redis:7
+
+    container_name: tutoring-redis
+
+    restart: always
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - ./volumes/redis:/data
+
+    networks:
+      - tutoring-network
+
+
+  opensearch:
+
+    image: opensearchproject/opensearch:2.15.0
+
+    container_name: tutoring-opensearch
+
+    restart: always
+
+    environment:
+
+      discovery.type: single-node
+
+      bootstrap.memory_lock: "true"
+
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+
+    volumes:
+      - ./volumes/opensearch:/usr/share/opensearch/data
+
+    networks:
+      - tutoring-network
+
+
+networks:
+
+  tutoring-network:
+    driver: bridge
